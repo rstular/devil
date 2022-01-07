@@ -13,6 +13,7 @@ lazy_static! {
             eval_stdin::register(),
             cgi_bin::register(),
             wordpress_login::register(),
+            wordpress_json::register(),
             wordpress_xmlrpc::register(),
             envfile::register(),
         ]
