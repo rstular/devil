@@ -35,6 +35,6 @@ pub fn register() -> RequestHandler {
     RequestHandler {
         name: HANDLER_NAME,
         pattern: Regex::new("eval-stdin\\.php").unwrap(),
-        handler: handler,
+        handler,
     }
 }

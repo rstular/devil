@@ -8,11 +8,11 @@ use regex::Regex;
 
 lazy_static! {
     static ref REGISTERED_HANDLERS: Vec<RequestHandler> = {
-        let mut handlers = Vec::new();
-        handlers.push(cgi_bin::register());
-        handlers.push(etc_passwd::register());
-        handlers.push(eval_stdin::register());
-        handlers
+        vec![
+            etc_passwd::register(),
+            eval_stdin::register(),
+            cgi_bin::register(),
+        ]
     };
     static ref DEFAULT_HANDLER: RequestHandler =
         RequestHandler::new("default", Regex::new("").unwrap(), default_handler);
@@ -67,17 +67,14 @@ pub fn default_handler(_bytes: Bytes, _req: HttpRequest) -> HandlerResponse {
 }
 
 pub fn get_header_value(req: &HttpRequest, header: &str) -> Option<String> {
-    match req.headers().get(header) {
-        Some(val) => Some(
-            val.to_str()
-                .unwrap_or_else(|e| {
-                    trace!("Failed to decode header value: {}", e);
-                    ""
-                })
-                .to_string(),
-        ),
-        None => None,
-    }
+    req.headers().get(header).map(|val| {
+        val.to_str()
+            .unwrap_or_else(|e| {
+                trace!("Failed to decode header: {}", e);
+                ""
+            })
+            .to_string()
+    })
 }
 
 pub async fn request_dispatcher(

@@ -80,8 +80,8 @@ async fn main() -> std::io::Result<()> {
             std::process::exit(1);
         })
         .get_int("http-port")
-        .unwrap_or_else(|_| 8080);
-    srv = if let Ok(_) = format!("{}:{}", addr, port).parse::<SocketAddr>() {
+        .unwrap_or(8080);
+    srv = if format!("{}:{}", addr, port).parse::<SocketAddr>().is_ok() {
         info!("Binding to IP address {}:{}", addr, port);
         srv.bind(format!("{}:{}", addr, port))?
     } else {

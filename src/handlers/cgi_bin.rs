@@ -35,6 +35,6 @@ pub fn register() -> RequestHandler {
     RequestHandler {
         name: HANDLER_NAME,
         pattern: Regex::new("cgi-bin").unwrap(),
-        handler: handler,
+        handler,
     }
 }

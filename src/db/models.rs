@@ -45,7 +45,7 @@ impl HandlerEvent {
         self
     }
 
-    pub fn insert(handler_event: Self, conn: &SqliteConnection) -> () {
+    pub fn insert(handler_event: Self, conn: &SqliteConnection) {
         if let Err(e) = diesel::insert_into(handler_events_dsl)
             .values(handler_event)
             .execute(conn)
