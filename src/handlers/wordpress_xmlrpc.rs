@@ -10,7 +10,7 @@ pub fn handler(bytes: Bytes, req: HttpRequest) -> HandlerResponse {
     HandlerResponse {
         http_response: HttpResponse::Ok()
             .content_type("text/plain;charset=UTF-8")
-            .body(""),
+            .body("XML-RPC server accepts POST requests only."),
         handler_event: Some(
             HandlerEvent::new(HANDLER_NAME)
                 .set_host(get_header_value(&req, "Host"))
