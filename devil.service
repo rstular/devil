@@ -1,0 +1,35 @@
+[Unit]
+Description=Anti-hacking service
+After=network.target
+
+[Service]
+Type=simple
+Restart=on-failure
+
+ExecStart=/srv/services/devil/lildevil /etc/devil/Config.toml
+WorkingDirectory=/srv/services/devil/
+
+StandardOutput=journal
+StandardError=journal
+StandardInput=null
+
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=full
+ProtectHome=true
+ReadOnlyPaths=/srv/services/devil/
+StateDirectory=devil
+RuntimeDirectory=devil
+DynamicUser=true
+
+PrivateUsers=true
+
+NoNewPrivileges=true
+ConfigurationDirectory=devil
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=multi-user.target

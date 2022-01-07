@@ -1,6 +1,6 @@
 use crate::db::models;
 use crate::db::DbPool;
-use crate::handlers::{cgi_bin, etc_passwd, eval_stdin};
+use crate::handlers::*;
 use actix_web::{web, web::Bytes, HttpRequest, HttpResponse, Responder};
 use lazy_static::lazy_static;
 use log::{debug, trace};
@@ -12,6 +12,9 @@ lazy_static! {
             etc_passwd::register(),
             eval_stdin::register(),
             cgi_bin::register(),
+            wordpress_login::register(),
+            wordpress_xmlrpc::register(),
+            envfile::register(),
         ]
     };
     static ref DEFAULT_HANDLER: RequestHandler =
