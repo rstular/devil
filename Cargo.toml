@@ -1,0 +1,24 @@
+[package]
+name = "lildevil"
+description = "A simple HTTP server, to give hackers what they want."
+version = "0.1.0"
+edition = "2021"
+repository = "https://github.com/rstular/lildevil/"
+authors = ["rstular <dev@rstular.eu>"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix-web = "3"
+anyhow = "1.0.52"
+chrono = { version = "0.4.19", features = ["serde"] }
+config = "0.11.0"
+diesel = { version = "1.4.8", features = ["sqlite", "chrono", "r2d2"] }
+diesel_migrations = "1.4.0"
+env_logger = "0.9.0"
+lazy_static = "1.4.0"
+log = "0.4.14"
+r2d2 = "0.8.9"
+r2d2-diesel = "1.0.0"
+regex = "1.5"
+serde = "1.0.133"
