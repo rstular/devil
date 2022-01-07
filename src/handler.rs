@@ -15,6 +15,7 @@ lazy_static! {
             wordpress_login::register(),
             wordpress_json::register(),
             wordpress_xmlrpc::register(),
+            wordpress_wlwmanifest::register(),
             envfile::register(),
         ]
     };
