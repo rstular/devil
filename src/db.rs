@@ -23,7 +23,7 @@ pub fn establish_connection() -> DbPool {
         .read()
         .unwrap_or_else(|e| {
             error!("Failed to acquire read lock on settings: {}", e);
-            std::process::exit(1);
+            std::process::abort();
         })
         .get_str("db-path")
         .unwrap_or_else(|_| String::from("storage.db"));
@@ -32,7 +32,7 @@ pub fn establish_connection() -> DbPool {
     let manager = ConnectionManager::<SqliteConnection>::new(&database_url);
     let pool = r2d2::Pool::builder().build(manager).unwrap_or_else(|e| {
         error!("Failed to create database pool: {}", e);
-        std::process::exit(1);
+        std::process::abort();
     });
 
     if cfg!(test)

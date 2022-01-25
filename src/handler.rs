@@ -93,10 +93,7 @@ pub fn get_header_value(req: &HttpRequest, header: &str) -> Option<String> {
 }
 
 pub fn get_peer_address(req: &HttpRequest) -> Option<String> {
-    match req.peer_addr() {
-        Some(addr) => Some(addr.ip().to_string()),
-        None => None,
-    }
+    req.peer_addr().map(|addr| addr.ip().to_string())
 }
 
 pub fn get_ip_address(req: &HttpRequest) -> Option<String> {
@@ -104,7 +101,7 @@ pub fn get_ip_address(req: &HttpRequest) -> Option<String> {
     match forwarded_for {
         Some(ip) => {
             let ips: Vec<&str> = ip.split(',').collect();
-            if ips.len() > 0 {
+            if !ips.is_empty() {
                 Some(ips[0].to_string())
             } else {
                 get_peer_address(req)

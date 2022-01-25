@@ -12,7 +12,7 @@ authors = ["rstular <dev@rstular.eu>"]
 actix-rt = "1.1.1"
 actix-web = { version = "3", features = ["rustls"] }
 anyhow = "1.0.52"
-chrono = { version = "0.4.19", features = ["serde"] }
+chrono = { version = "0.4", features = ["serde"] }
 config = "0.11.0"
 diesel = { version = "1.4.8", features = ["sqlite", "chrono", "r2d2"] }
 diesel_migrations = "1.4.0"

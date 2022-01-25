@@ -55,15 +55,14 @@ pub fn handler(bytes: Bytes, req: HttpRequest) -> HandlerResponse {
                     },
                 ),
         ),
-        report: match get_ip_address(&req) {
-            Some(ip) => Some(Report::new(ip).add_categories(vec![
+        report: get_ip_address(&req).map(|ip| {
+            Report::new(ip).add_categories(vec![
                 Category::Hacking,
                 Category::WebAppAttack,
                 Category::BadWebBot,
                 Category::BruteForce,
-            ])),
-            None => None,
-        },
+            ])
+        }),
     }
 }
 

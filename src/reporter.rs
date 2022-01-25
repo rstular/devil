@@ -1,8 +1,9 @@
-use log::{debug, error, info};
 use actix_web::client::ClientBuilder;
+use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::sync::mpsc;
+use std::time::{Duration, Instant};
 
 pub struct ReporterConfig {
     pub api_key: String,
@@ -84,6 +85,8 @@ struct ReportHttpBody {
 pub async fn submit_reports(config: ReporterConfig, receiver: mpsc::Receiver<Report>) {
     debug!("Submitting reports");
 
+    let mut report_timestamps: HashMap<String, Instant> = HashMap::new();
+
     let endpoint_url = config.endpoint.as_str();
     let client = ClientBuilder::default()
         .header("Accept", "application/json")
@@ -91,6 +94,15 @@ pub async fn submit_reports(config: ReporterConfig, receiver: mpsc::Receiver<Rep
         .finish();
 
     while let Ok(msg) = receiver.recv() {
+        if report_timestamps.contains_key(&msg.ip)
+            && Instant::now().duration_since(report_timestamps.get(&msg.ip).unwrap().to_owned())
+                < Duration::from_secs(15 * 60)
+        {
+            debug!("Skipping report for {} - rate limit", msg.ip);
+            continue;
+        }
+        report_timestamps.insert(msg.ip.clone(), Instant::now());
+
         let http_report = ReportHttpBody {
             ip: msg.ip,
             categories: msg

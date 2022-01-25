@@ -45,14 +45,13 @@ pub fn handler(_bytes: Bytes, req: HttpRequest) -> HandlerResponse {
                 .set_src_ip(get_header_value(&req, "X-Forwarded-For"))
                 .set_uri(req.uri().to_string()),
         )
-        .set_report(match get_ip_address(&req) {
-            Some(ip) => Some(Report::new(ip).add_categories(vec![
+        .set_report(get_ip_address(&req).map(|ip| {
+            Report::new(ip).add_categories(vec![
                 Category::Hacking,
                 Category::WebAppAttack,
                 Category::BadWebBot,
-            ])),
-            None => None,
-        })
+            ])
+        }))
 }
 
 pub fn register() -> RequestHandler {

@@ -52,31 +52,30 @@ const RESP_CONTENT: &str = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
 ";
 
 pub fn handler(_bytes: Bytes, req: HttpRequest) -> HandlerResponse {
-  HandlerResponse {
-    http_response: HttpResponse::Ok()
-      .content_type("application/xml;charset=UTF-8")
-      .body(RESP_CONTENT),
-    handler_event: Some(
-      HandlerEvent::new(HANDLER_NAME)
-        .set_host(get_header_value(&req, "Host"))
-        .set_uri(req.uri().to_string())
-        .set_src_ip(get_header_value(&req, "X-Forwarded-For")),
-    ),
-    report: match get_ip_address(&req) {
-      Some(ip) => Some(Report::new(ip).add_categories(vec![
-        Category::Hacking,
-        Category::WebAppAttack,
-        Category::BadWebBot,
-      ])),
-      None => None,
-    },
-  }
+    HandlerResponse {
+        http_response: HttpResponse::Ok()
+            .content_type("application/xml;charset=UTF-8")
+            .body(RESP_CONTENT),
+        handler_event: Some(
+            HandlerEvent::new(HANDLER_NAME)
+                .set_host(get_header_value(&req, "Host"))
+                .set_uri(req.uri().to_string())
+                .set_src_ip(get_header_value(&req, "X-Forwarded-For")),
+        ),
+        report: get_ip_address(&req).map(|ip| {
+            Report::new(ip).add_categories(vec![
+                Category::Hacking,
+                Category::WebAppAttack,
+                Category::BadWebBot,
+            ])
+        }),
+    }
 }
 
 pub fn register() -> RequestHandler {
-  RequestHandler {
-    name: HANDLER_NAME,
-    pattern: Regex::new("wp-includes/wlwmanifest\\.xml").expect("Failed to compile regex"),
-    handler,
-  }
+    RequestHandler {
+        name: HANDLER_NAME,
+        pattern: Regex::new("wp-includes/wlwmanifest\\.xml").expect("Failed to compile regex"),
+        handler,
+    }
 }
