@@ -30,12 +30,14 @@ pub fn handler(bytes: Bytes, req: HttpRequest) -> HandlerResponse {
                 ),
         ),
         report: get_ip_address(&req).map(|ip| {
-            Report::new(ip).add_categories(vec![
-                Category::Hacking,
-                Category::WebAppAttack,
-                Category::BadWebBot,
-                Category::BruteForce,
-            ])
+            Report::new(ip)
+                .add_categories(vec![
+                    Category::Hacking,
+                    Category::WebAppAttack,
+                    Category::BadWebBot,
+                    Category::BruteForce,
+                ])
+                .set_comment_text(format!("{} {}", req.method().as_str(), req.uri()))
         }),
     }
 }

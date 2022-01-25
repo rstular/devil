@@ -1,4 +1,5 @@
 use actix_web::client::ClientBuilder;
+use chrono::Utc;
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
@@ -31,6 +32,11 @@ impl Report {
         self
     }
 
+    pub fn set_comment_text(mut self, comment: String) -> Self {
+        self.comment = Some(comment);
+        self
+    }
+
     pub fn add_category(mut self, category: Category) -> Self {
         self.categories.insert(category);
         self
@@ -47,7 +53,7 @@ impl Report {
     }
 }
 
-#[allow(dead_code)]
+#[allow(dead_code, clippy::upper_case_acronyms)]
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub enum Category {
     DNSCompromise = 1,
@@ -104,14 +110,22 @@ pub async fn submit_reports(config: ReporterConfig, receiver: mpsc::Receiver<Rep
         report_timestamps.insert(msg.ip.clone(), Instant::now());
 
         let http_report = ReportHttpBody {
-            ip: msg.ip,
+            ip: msg.ip.clone(),
             categories: msg
                 .categories
                 .into_iter()
                 .map(|c| (c as i32).to_string())
                 .collect::<Vec<String>>()
                 .join(","),
-            comment: msg.comment,
+            comment: match msg.comment {
+                Some(comment) => Some(format!(
+                    "[{}] {} - {}",
+                    Utc::now().to_rfc3339(),
+                    msg.ip,
+                    comment
+                )),
+                None => None,
+            },
         };
 
         match client.post(endpoint_url).send_json(&http_report).await {

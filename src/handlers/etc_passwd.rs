@@ -46,11 +46,13 @@ pub fn handler(_bytes: Bytes, req: HttpRequest) -> HandlerResponse {
                 .set_uri(req.uri().to_string()),
         )
         .set_report(get_ip_address(&req).map(|ip| {
-            Report::new(ip).add_categories(vec![
-                Category::Hacking,
-                Category::WebAppAttack,
-                Category::BadWebBot,
-            ])
+            Report::new(ip)
+                .add_categories(vec![
+                    Category::Hacking,
+                    Category::WebAppAttack,
+                    Category::BadWebBot,
+                ])
+                .set_comment_text(format!("{} {}", req.method().as_str(), req.uri()))
         }))
 }
 
