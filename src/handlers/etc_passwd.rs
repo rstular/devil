@@ -1,5 +1,6 @@
 use crate::db::models::HandlerEvent;
-use crate::handler::{get_header_value, HandlerResponse, RequestHandler};
+use crate::handler::{get_header_value, get_ip_address, HandlerResponse, RequestHandler};
+use crate::reporter::{Category, Report};
 use actix_web::{web::Bytes, HttpRequest};
 use regex::Regex;
 
@@ -37,18 +38,27 @@ postgres:x:106:113:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash
 mysql:x:107:114:MySQL Server,,,:/nonexistent:/bin/false";
 
 pub fn handler(_bytes: Bytes, req: HttpRequest) -> HandlerResponse {
-    HandlerResponse::new(RESP_CONTENT).set_event(
-        HandlerEvent::new(HANDLER_NAME)
-            .set_host(get_header_value(&req, "Host"))
-            .set_src_ip(get_header_value(&req, "X-Forwarded-For"))
-            .set_uri(req.uri().to_string()),
-    )
+    HandlerResponse::new(RESP_CONTENT)
+        .set_event(
+            HandlerEvent::new(HANDLER_NAME)
+                .set_host(get_header_value(&req, "Host"))
+                .set_src_ip(get_header_value(&req, "X-Forwarded-For"))
+                .set_uri(req.uri().to_string()),
+        )
+        .set_report(match get_ip_address(&req) {
+            Some(ip) => Some(Report::new(ip).add_categories(vec![
+                Category::Hacking,
+                Category::WebAppAttack,
+                Category::BadWebBot,
+            ])),
+            None => None,
+        })
 }
 
 pub fn register() -> RequestHandler {
     RequestHandler {
         name: HANDLER_NAME,
-        pattern: Regex::new(".*etc.*passwd").unwrap(),
+        pattern: Regex::new(".*etc.*passwd").expect("Failed to compile regex"),
         handler,
     }
 }

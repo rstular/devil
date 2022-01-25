@@ -1,11 +1,13 @@
+use actix_rt::Arbiter;
 use actix_web::{middleware, web, App, HttpServer};
 use config::Config;
 use env_logger::Env;
 use lazy_static::lazy_static;
 use log::{debug, error, info, trace, warn};
+use reporter::Report;
 use std::env;
 use std::net::SocketAddr;
-use std::sync::RwLock;
+use std::sync::{mpsc, RwLock};
 
 #[macro_use]
 extern crate diesel;
@@ -15,6 +17,7 @@ extern crate diesel_migrations;
 mod db;
 mod handler;
 mod handlers;
+mod reporter;
 
 use handler::request_dispatcher;
 
@@ -22,7 +25,7 @@ lazy_static! {
     pub static ref SETTINGS: RwLock<Config> = RwLock::new(Config::default());
 }
 
-#[actix_web::main]
+#[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("info"));
 
@@ -64,11 +67,14 @@ async fn main() -> std::io::Result<()> {
     let conn_pool = db::establish_connection();
     info!("Connected to database");
 
+    let (tx, rx) = mpsc::channel::<Report>();
+
     info!("Starting HTTP server");
 
     let mut srv = HttpServer::new(move || {
         App::new()
             .data(conn_pool.clone())
+            .data(tx.clone())
             .wrap(middleware::Logger::default())
             .default_service(web::route().to(request_dispatcher))
     });
@@ -88,6 +94,27 @@ async fn main() -> std::io::Result<()> {
         warn!("Binding to non-IP address {}", addr);
         srv.bind_uds(addr)?
     };
+    let run_result = srv.run();
 
-    srv.run().await
+    let reporter_config = reporter::ReporterConfig {
+        api_key: SETTINGS
+            .read()
+            .expect("Could not obtain read lock on settings")
+            .get_str("abuseipdb-key")
+            .unwrap_or_else(|_| {
+                error!("Failed to acquire read lock on settings");
+                std::process::exit(1);
+            }),
+        endpoint: SETTINGS
+            .read()
+            .unwrap_or_else(|e| {
+                error!("Failed to acquire read lock on settings: {}", e);
+                std::process::exit(1);
+            })
+            .get_str("reporter-endpoint")
+            .unwrap_or_else(|_| String::from("https://api.abuseipdb.com/api/v2/report")),
+    };
+
+    Arbiter::spawn(reporter::submit_reports(reporter_config, rx));
+    run_result.await
 }

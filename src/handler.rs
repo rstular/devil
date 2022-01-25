@@ -1,10 +1,12 @@
 use crate::db::models;
 use crate::db::DbPool;
 use crate::handlers::*;
+use crate::reporter::Report;
 use actix_web::{web, web::Bytes, HttpRequest, HttpResponse, Responder};
 use lazy_static::lazy_static;
-use log::{debug, trace};
+use log::{debug, error, trace};
 use regex::Regex;
+use std::sync::mpsc;
 
 lazy_static! {
     static ref REGISTERED_HANDLERS: Vec<RequestHandler> = {
@@ -26,6 +28,7 @@ lazy_static! {
 pub struct HandlerResponse {
     pub http_response: HttpResponse,
     pub handler_event: Option<models::HandlerEvent>,
+    pub report: Option<Report>,
 }
 
 impl HandlerResponse {
@@ -33,11 +36,17 @@ impl HandlerResponse {
         HandlerResponse {
             http_response: HttpResponse::Ok().body(response_content),
             handler_event: None,
+            report: None,
         }
     }
 
     pub fn set_event(mut self, event: models::HandlerEvent) -> Self {
         self.handler_event = Some(event);
+        self
+    }
+
+    pub fn set_report(mut self, report: Option<Report>) -> Self {
+        self.report = report;
         self
     }
 }
@@ -68,6 +77,7 @@ pub fn default_handler(_bytes: Bytes, _req: HttpRequest) -> HandlerResponse {
     HandlerResponse {
         http_response: HttpResponse::NotFound().body("404 - Not Found"),
         handler_event: None,
+        report: None,
     }
 }
 
@@ -82,10 +92,33 @@ pub fn get_header_value(req: &HttpRequest, header: &str) -> Option<String> {
     })
 }
 
+pub fn get_peer_address(req: &HttpRequest) -> Option<String> {
+    match req.peer_addr() {
+        Some(addr) => Some(addr.ip().to_string()),
+        None => None,
+    }
+}
+
+pub fn get_ip_address(req: &HttpRequest) -> Option<String> {
+    let forwarded_for = get_header_value(req, "X-Forwarded-For");
+    match forwarded_for {
+        Some(ip) => {
+            let ips: Vec<&str> = ip.split(',').collect();
+            if ips.len() > 0 {
+                Some(ips[0].to_string())
+            } else {
+                get_peer_address(req)
+            }
+        }
+        None => get_peer_address(req),
+    }
+}
+
 pub async fn request_dispatcher(
     bytes: Bytes,
     req: HttpRequest,
-    pool: web::Data<DbPool>,
+    db_pool: web::Data<DbPool>,
+    sender: web::Data<mpsc::Sender<Report>>,
 ) -> impl Responder {
     let handler: &RequestHandler = REGISTERED_HANDLERS
         .iter()
@@ -97,7 +130,16 @@ pub async fn request_dispatcher(
     let resp = handler_func(bytes, req);
 
     if let Some(event) = resp.handler_event {
-        models::HandlerEvent::insert(event, &pool.get().unwrap());
+        models::HandlerEvent::insert(
+            event,
+            &db_pool.get().expect("Failed to get database connection"),
+        );
+    }
+
+    if let Some(report) = resp.report {
+        sender
+            .send(report)
+            .unwrap_or_else(|e| error!("Failed to send report: {}", e));
     }
 
     resp.http_response

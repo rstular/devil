@@ -38,11 +38,11 @@ pub fn establish_connection() -> DbPool {
     if cfg!(test)
         || SETTINGS
             .read()
-            .unwrap()
+            .expect("Failed to acquire read lock on settings")
             .get_bool("db-migrate")
             .unwrap_or(false)
     {
-        run_migrations(&pool.get().unwrap());
+        run_migrations(&pool.get().expect("Failed to acquire database connection"));
     }
 
     pool

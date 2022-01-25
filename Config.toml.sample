@@ -3,3 +3,5 @@ http-port = 8080
 
 db-path = "storage.db"
 db-migrate = true
+
+abuseipdb-key = "your-key"

@@ -1,5 +1,6 @@
 use crate::db::models::HandlerEvent;
-use crate::handler::{get_header_value, HandlerResponse, RequestHandler};
+use crate::handler::{get_header_value, get_ip_address, HandlerResponse, RequestHandler};
+use crate::reporter::{Category, Report};
 use actix_web::{web::Bytes, HttpRequest, HttpResponse};
 use lazy_static::lazy_static;
 use log::warn;
@@ -16,12 +17,12 @@ struct RESTEndpoint {
 lazy_static! {
     static ref ENDPOINT_LIST: Vec<RESTEndpoint> = {
         vec![RESTEndpoint {
-            pattern: Regex::new("v2/users/").unwrap(),
+            pattern: Regex::new("v2/users/").expect("Failed to compile regex"),
             response: ENUM_USERS_RESP,
         }]
     };
     static ref DEFAULT_ENDPOINT: RESTEndpoint = RESTEndpoint {
-        pattern: Regex::new("").unwrap(),
+        pattern: Regex::new("").expect("Failed to compile regex"),
         response: DEFAULT_RESP,
     };
 }
@@ -54,13 +55,22 @@ pub fn handler(bytes: Bytes, req: HttpRequest) -> HandlerResponse {
                     },
                 ),
         ),
+        report: match get_ip_address(&req) {
+            Some(ip) => Some(Report::new(ip).add_categories(vec![
+                Category::Hacking,
+                Category::WebAppAttack,
+                Category::BadWebBot,
+                Category::BruteForce,
+            ])),
+            None => None,
+        },
     }
 }
 
 pub fn register() -> RequestHandler {
     RequestHandler {
         name: HANDLER_NAME,
-        pattern: Regex::new("wp-json").unwrap(),
+        pattern: Regex::new("wp-json").expect("Failed to compile regex"),
         handler,
     }
 }

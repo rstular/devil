@@ -1,5 +1,6 @@
 use crate::db::models::HandlerEvent;
-use crate::handler::{get_header_value, HandlerResponse, RequestHandler};
+use crate::handler::{get_header_value, get_ip_address, HandlerResponse, RequestHandler};
+use crate::reporter::{Category, Report};
 use actix_web::{web::Bytes, HttpRequest, HttpResponse};
 use log::warn;
 use regex::Regex;
@@ -28,13 +29,22 @@ pub fn handler(bytes: Bytes, req: HttpRequest) -> HandlerResponse {
                     },
                 ),
         ),
+        report: match get_ip_address(&req) {
+            Some(ip) => Some(Report::new(ip).add_categories(vec![
+                Category::Hacking,
+                Category::WebAppAttack,
+                Category::BadWebBot,
+                Category::BruteForce,
+            ])),
+            None => None,
+        },
     }
 }
 
 pub fn register() -> RequestHandler {
     RequestHandler {
         name: HANDLER_NAME,
-        pattern: Regex::new("wp-login\\.php").unwrap(),
+        pattern: Regex::new("wp-login\\.php").expect("Failed to compile regex"),
         handler,
     }
 }
