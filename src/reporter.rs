@@ -100,15 +100,12 @@ pub async fn submit_reports(config: ReporterConfig, receiver: mpsc::Receiver<Rep
         .finish();
 
     while let Ok(msg) = receiver.recv() {
-        if report_timestamps.contains_key(&msg.ip) {
-            if Instant::now().duration_since(report_timestamps.get(&msg.ip).unwrap().to_owned())
+        if report_timestamps.contains_key(&msg.ip)
+            && Instant::now().duration_since(report_timestamps.get(&msg.ip).unwrap().to_owned())
                 < Duration::from_secs(15 * 60)
-            {
-                debug!("Skipping report for {} - rate limit", msg.ip);
-                continue;
-            } else {
-                report_timestamps.remove(&msg.ip);
-            }
+        {
+            debug!("Skipping report for {} - rate limit", msg.ip);
+            continue;
         }
         report_timestamps.insert(msg.ip.clone(), Instant::now());
 
