@@ -19,6 +19,7 @@ lazy_static! {
             wordpress_xmlrpc::register(),
             wordpress_wlwmanifest::register(),
             envfile::register(),
+            robots_bait::register(),
         ]
     };
     static ref DEFAULT_HANDLER: RequestHandler =

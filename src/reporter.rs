@@ -77,7 +77,7 @@ pub enum Category {
     BadWebBot,
     ExploitedHost,
     WebAppAttack,
-    SSH,
+    SSHAttack,
     IoTTargeted,
 }
 
