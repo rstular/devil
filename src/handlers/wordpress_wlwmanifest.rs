@@ -51,16 +51,17 @@ const RESP_CONTENT: &str = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
 </manifest>
 ";
 
-pub fn handler(_bytes: Bytes, req: HttpRequest) -> HandlerResponse {
+pub fn handler(_bytes: Bytes, req: &HttpRequest) -> HandlerResponse {
     HandlerResponse {
         http_response: HttpResponse::Ok()
             .content_type("application/xml;charset=UTF-8")
             .body(RESP_CONTENT),
         handler_event: Some(
             HandlerEvent::new(HANDLER_NAME)
-                .set_host(get_header_value(&req, "Host"))
+                .set_host(get_header_value(req, "Host"))
                 .set_uri(req.uri().to_string())
-                .set_src_ip(get_header_value(&req, "X-Forwarded-For")),
+                .set_src_ip(get_header_value(req, "X-Forwarded-For"))
+                .set_user_agent(get_header_value(req, "User-Agent")),
         ),
         report: get_ip_address(&req).map(|ip| {
             Report::new(ip)

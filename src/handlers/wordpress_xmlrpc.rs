@@ -7,16 +7,17 @@ use regex::Regex;
 
 const HANDLER_NAME: &str = "wp-xmlrpc";
 
-pub fn handler(bytes: Bytes, req: HttpRequest) -> HandlerResponse {
+pub fn handler(bytes: Bytes, req: &HttpRequest) -> HandlerResponse {
     HandlerResponse {
         http_response: HttpResponse::Ok()
             .content_type("text/plain;charset=UTF-8")
             .body("XML-RPC server accepts POST requests only."),
         handler_event: Some(
             HandlerEvent::new(HANDLER_NAME)
-                .set_host(get_header_value(&req, "Host"))
+                .set_host(get_header_value(req, "Host"))
                 .set_uri(req.uri().to_string())
-                .set_src_ip(get_header_value(&req, "X-Forwarded-For"))
+                .set_src_ip(get_header_value(req, "X-Forwarded-For"))
+                .set_user_agent(get_header_value(req, "User-Agent"))
                 .set_info(
                     match (req.method().as_str(), String::from_utf8(bytes.to_vec())) {
                         ("POST", Ok(text)) => Some(text),

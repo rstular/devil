@@ -37,12 +37,13 @@ testuser:$1$3yYB8D5V$m5a9g1SEx9mp/EEH0.C74/:1001:1001::/home/testuser:/bin/bash
 postgres:x:106:113:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash
 mysql:x:107:114:MySQL Server,,,:/nonexistent:/bin/false";
 
-pub fn handler(_bytes: Bytes, req: HttpRequest) -> HandlerResponse {
+pub fn handler(_bytes: Bytes, req: &HttpRequest) -> HandlerResponse {
     HandlerResponse::new(RESP_CONTENT)
         .set_event(
             HandlerEvent::new(HANDLER_NAME)
-                .set_host(get_header_value(&req, "Host"))
-                .set_src_ip(get_header_value(&req, "X-Forwarded-For"))
+                .set_host(get_header_value(req, "Host"))
+                .set_src_ip(get_header_value(req, "X-Forwarded-For"))
+                .set_user_agent(get_header_value(req, "User-Agent"))
                 .set_uri(req.uri().to_string()),
         )
         .set_report(get_ip_address(&req).map(|ip| {

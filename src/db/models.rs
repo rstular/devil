@@ -12,6 +12,7 @@ pub struct HandlerEvent {
     pub uri: Option<String>,
     pub src_ip: Option<String>,
     pub info: Option<String>,
+    pub user_agent: Option<String>,
 }
 
 impl HandlerEvent {
@@ -22,6 +23,7 @@ impl HandlerEvent {
             uri: None,
             src_ip: None,
             info: None,
+            user_agent: None,
         }
     }
 
@@ -42,6 +44,11 @@ impl HandlerEvent {
 
     pub fn set_info(mut self, info: Option<String>) -> Self {
         self.info = info;
+        self
+    }
+
+    pub fn set_user_agent(mut self, user_agent: Option<String>) -> Self {
+        self.user_agent = user_agent;
         self
     }
 

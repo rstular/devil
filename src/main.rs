@@ -132,7 +132,7 @@ async fn main() -> std::io::Result<()> {
             .default_service(web::route().to(request_dispatcher))
     });
     srv = if settings.port.is_some() {
-        let port = settings.port.unwrap();
+        let port = settings.port.expect("Could not get port from settings");
         let addr_obj = match format!("{}:{}", settings.host, port).parse::<SocketAddr>() {
             Ok(addr) => addr,
             Err(e) => {

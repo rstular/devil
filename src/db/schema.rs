@@ -7,5 +7,6 @@ table! {
         uri -> Nullable<Text>,
         src_ip -> Nullable<Text>,
         info -> Nullable<Text>,
+        user_agent -> Nullable<Text>,
     }
 }

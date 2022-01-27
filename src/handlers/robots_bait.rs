@@ -20,7 +20,7 @@ lazy_static! {
         Regex::new("^/robots\\.txt").expect("Failed to compile robots.txt pattern regex");
 }
 
-pub fn handler(bytes: Bytes, req: HttpRequest) -> HandlerResponse {
+pub fn handler(bytes: Bytes, req: &HttpRequest) -> HandlerResponse {
     if ROBOTS_PATTERN.is_match(&req.uri().to_string()) {
         return HandlerResponse::new(ROBOTS_CONTENT);
     }
@@ -28,8 +28,9 @@ pub fn handler(bytes: Bytes, req: HttpRequest) -> HandlerResponse {
     HandlerResponse::new(ENDPOINT_CONTENT)
         .set_event(
             HandlerEvent::new(HANDLER_NAME)
-                .set_host(get_header_value(&req, "Host"))
-                .set_src_ip(get_header_value(&req, "X-Forwarded-For"))
+                .set_host(get_header_value(req, "Host"))
+                .set_src_ip(get_header_value(req, "X-Forwarded-For"))
+                .set_user_agent(get_header_value(req, "User-Agent"))
                 .set_uri(req.uri().to_string())
                 .set_info(
                     match (req.method().as_str(), String::from_utf8(bytes.to_vec())) {
