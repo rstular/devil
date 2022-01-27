@@ -1,4 +1,4 @@
-use crate::SETTINGS;
+use crate::{get_config_reader, get_settings_reader};
 use diesel::sqlite::SqliteConnection;
 use log::{debug, error};
 use r2d2::Pool;
@@ -19,29 +19,16 @@ pub fn run_migrations(conn: &SqliteConnection) {
 }
 
 pub fn establish_connection() -> DbPool {
-    let database_url = SETTINGS
-        .read()
-        .unwrap_or_else(|e| {
-            error!("Failed to acquire read lock on settings: {}", e);
-            std::process::abort();
-        })
-        .get_str("db-path")
-        .unwrap_or_else(|_| String::from("storage.db"));
+    let database_url = &get_settings_reader().db_path;
     debug!("Connecting to database at {}", database_url);
 
-    let manager = ConnectionManager::<SqliteConnection>::new(&database_url);
+    let manager = ConnectionManager::<SqliteConnection>::new(database_url);
     let pool = r2d2::Pool::builder().build(manager).unwrap_or_else(|e| {
         error!("Failed to create database pool: {}", e);
         std::process::abort();
     });
 
-    if cfg!(test)
-        || SETTINGS
-            .read()
-            .expect("Failed to acquire read lock on settings")
-            .get_bool("db-migrate")
-            .unwrap_or(false)
-    {
+    if cfg!(test) || get_config_reader().get_bool("db-migrate").unwrap_or(false) {
         run_migrations(&pool.get().expect("Failed to acquire database connection"));
     }
 

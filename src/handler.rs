@@ -1,10 +1,11 @@
 use crate::db::models;
 use crate::db::DbPool;
+use crate::get_settings_reader;
 use crate::handlers::*;
 use crate::reporter::Report;
 use actix_web::{web, web::Bytes, HttpRequest, HttpResponse, Responder};
 use lazy_static::lazy_static;
-use log::{debug, error, trace};
+use log::{debug, trace};
 use regex::Regex;
 use std::sync::mpsc;
 
@@ -134,10 +135,12 @@ pub async fn request_dispatcher(
         );
     }
 
-    if let Some(report) = resp.report {
-        sender
-            .send(report)
-            .unwrap_or_else(|e| error!("Failed to send report: {}", e));
+    if get_settings_reader().reporting_enabled {
+        if let Some(report) = resp.report {
+            sender
+                .send(report)
+                .expect("Failed to send report to reporter");
+        }
     }
 
     resp.http_response
