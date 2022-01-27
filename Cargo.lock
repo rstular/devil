@@ -563,6 +563,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "devil"
+version = "0.2.0"
+dependencies = [
+ "actix-rt",
+ "actix-web",
+ "anyhow",
+ "chrono",
+ "config",
+ "diesel",
+ "diesel_migrations",
+ "env_logger",
+ "lazy_static",
+ "log",
+ "r2d2",
+ "r2d2-diesel",
+ "regex",
+ "serde 1.0.133",
+]
+
+[[package]]
 name = "diesel"
 version = "1.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1001,26 +1021,6 @@ checksum = "290b64917f8b0cb885d9de0f9959fe1f775d7fa12f1da2db9001c1c8ab60f89d"
 dependencies = [
  "pkg-config",
  "vcpkg",
-]
-
-[[package]]
-name = "lildevil"
-version = "0.1.0"
-dependencies = [
- "actix-rt",
- "actix-web",
- "anyhow",
- "chrono",
- "config",
- "diesel",
- "diesel_migrations",
- "env_logger",
- "lazy_static",
- "log",
- "r2d2",
- "r2d2-diesel",
- "regex",
- "serde 1.0.133",
 ]
 
 [[package]]

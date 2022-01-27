@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 Restart=on-failure
 
-ExecStart=/srv/services/devil/lildevil /etc/devil/Config.toml
+ExecStart=/srv/services/devil/devil /etc/devil/Config.toml
 WorkingDirectory=/srv/services/devil/
 
 StandardOutput=journal
