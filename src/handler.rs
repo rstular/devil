@@ -98,6 +98,8 @@ pub fn get_peer_address(req: &HttpRequest) -> Option<String> {
     req.peer_addr().map(|addr| addr.ip().to_string())
 }
 
+// Warning: This function can be abused by manually setting the X-Forwarded-For header.
+// XXX: Fix it
 pub fn get_ip_address(req: &HttpRequest) -> Option<String> {
     let forwarded_for = get_header_value(req, "X-Forwarded-For");
     match forwarded_for {
