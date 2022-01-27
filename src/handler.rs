@@ -7,6 +7,7 @@ use actix_web::{web, web::Bytes, HttpRequest, HttpResponse, Responder};
 use lazy_static::lazy_static;
 use log::{debug, trace};
 use regex::Regex;
+use std::net::IpAddr;
 use std::sync::mpsc;
 
 lazy_static! {
@@ -104,9 +105,12 @@ pub fn get_ip_address(req: &HttpRequest) -> Option<String> {
     let forwarded_for = get_header_value(req, "X-Forwarded-For");
     match forwarded_for {
         Some(ip) => {
-            let ips: Vec<&str> = ip.split(',').collect();
-            if !ips.is_empty() {
-                Some(ips[0].to_string())
+            let last_ip = match ip.rfind(", ") {
+                Some(pos) => &ip[pos + 2..],
+                None => &ip,
+            };
+            if last_ip.parse::<IpAddr>().is_ok() {
+                Some(last_ip.to_string())
             } else {
                 get_peer_address(req)
             }
