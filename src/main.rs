@@ -41,7 +41,7 @@ async fn main() -> std::io::Result<()> {
                 std::process::abort();
             });
         config
-            .merge(config::Environment::with_prefix("LILDEVIL"))
+            .merge(config::Environment::with_prefix("DEVIL"))
             .unwrap_or_else(|e| {
                 error!("Failed to load environment variables: {}", e);
                 std::process::abort();
