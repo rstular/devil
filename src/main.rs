@@ -1,5 +1,5 @@
 use actix_rt::System;
-use actix_web::{web, App, HttpServer};
+use actix_web::{middleware, web, App, HttpServer};
 use env_logger::Env;
 use handler::request_dispatcher;
 use log::{debug, error, info, trace, warn};
@@ -78,6 +78,7 @@ async fn main() -> std::io::Result<()> {
     info!("Starting HTTP server");
     let mut srv = HttpServer::new(move || {
         App::new()
+            .wrap(middleware::NormalizePath::default())
             .data(conn_pool.clone())
             .data(tx.clone())
             .default_service(web::route().to(request_dispatcher))
