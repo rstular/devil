@@ -1,6 +1,6 @@
 use crate::db::models;
 use crate::db::DbPool;
-use crate::get_settings_reader;
+use crate::configuration::get_settings_reader;
 use crate::handlers::*;
 use crate::reporter::Report;
 use actix_web::{web, web::Bytes, HttpRequest, HttpResponse, Responder};

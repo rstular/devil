@@ -1,4 +1,4 @@
-use crate::{get_config_reader, get_settings_reader};
+use crate::configuration::{get_config_reader, get_settings_reader};
 use diesel::sqlite::SqliteConnection;
 use log::{debug, error};
 use r2d2::Pool;

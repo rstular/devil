@@ -1,13 +1,12 @@
 use actix_rt::System;
 use actix_web::{web, App, HttpServer};
-use config::Config;
 use env_logger::Env;
-use lazy_static::lazy_static;
+use handler::request_dispatcher;
 use log::{debug, error, info, trace, warn};
 use reporter::Report;
 use std::env;
 use std::net::SocketAddr;
-use std::sync::{mpsc, RwLock, RwLockReadGuard};
+use std::sync::mpsc;
 
 #[macro_use]
 extern crate diesel;
@@ -21,55 +20,6 @@ mod handlers;
 mod reporter;
 mod utils;
 
-use handler::request_dispatcher;
-
-lazy_static! {
-    pub static ref CONFIG: RwLock<Config> = RwLock::new(Config::default());
-    pub static ref SETTINGS: RwLock<configuration::Settings> =
-        RwLock::new(configuration::Settings::default());
-}
-
-pub fn get_config_reader() -> RwLockReadGuard<'static, Config> {
-    CONFIG.read().unwrap_or_else(|e| {
-        error!("Failed to acquire read lock on config file: {}", e);
-        std::process::abort();
-    })
-}
-
-pub fn get_settings_reader() -> RwLockReadGuard<'static, configuration::Settings> {
-    SETTINGS.read().unwrap_or_else(|e| {
-        error!("Failed to acquire read lock on settings: {}", e);
-        std::process::abort();
-    })
-}
-
-pub fn load_configuration() {
-    let settings = get_config_reader();
-    let parsed_config = configuration::Settings {
-        host: settings.get_str("http.host").unwrap_or_else(|_| {
-            error!("Failed to get HTTP host from config");
-            std::process::abort();
-        }),
-        port: settings.get_int("http.port").ok(),
-        workers: settings.get_int("http.workers").ok(),
-        reporting_enabled: settings.get_bool("reporting.enabled").unwrap_or(false),
-        abuseipdb_key: settings.get_str("reporting.abuseipdb-key").ok(),
-        report_endpoint: settings
-            .get("report-endpoint")
-            .unwrap_or_else(|_| String::from("https://api.abuseipdb.com/api/v2/report")),
-        db_path: settings
-            .get_str("db.path")
-            .unwrap_or_else(|_| String::from("storage.db")),
-    };
-    drop(settings);
-    let mut settings_guard = SETTINGS.write().unwrap_or_else(|e| {
-        error!("Failed to acquire write lock on settings: {}", e);
-        std::process::abort();
-    });
-    *settings_guard = parsed_config;
-    drop(settings_guard);
-}
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("info"));
@@ -80,7 +30,7 @@ async fn main() -> std::io::Result<()> {
 
     debug!("Loading configuration from {}", config_path);
     {
-        let mut config = CONFIG.write().unwrap_or_else(|e| {
+        let mut config = configuration::CONFIG.write().unwrap_or_else(|e| {
             error!("Failed to acquire write lock on settings: {}", e);
             std::process::abort();
         });
@@ -98,10 +48,10 @@ async fn main() -> std::io::Result<()> {
             });
     }
 
-    load_configuration();
+    configuration::load_configuration();
     info!("Loaded configuration");
 
-    let settings = get_settings_reader();
+    let settings = configuration::get_settings_reader();
     trace!("{:#?}", settings);
 
     let conn_pool = db::establish_connection();
