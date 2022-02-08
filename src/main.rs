@@ -52,8 +52,8 @@ pub fn load_configuration() {
         }),
         port: settings.get_int("http.port").ok(),
         workers: settings.get_int("http.workers").ok(),
-        reporting_enabled: settings.get_bool("enable-reporting").unwrap_or(false),
-        abuseipdb_key: settings.get_str("abuseipdb-key").ok(),
+        reporting_enabled: settings.get_bool("reporting.enabled").unwrap_or(false),
+        abuseipdb_key: settings.get_str("reporting.abuseipdb-key").ok(),
         report_endpoint: settings
             .get("report-endpoint")
             .unwrap_or_else(|_| String::from("https://api.abuseipdb.com/api/v2/report")),
