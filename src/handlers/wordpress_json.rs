@@ -33,7 +33,6 @@ lazy_static! {
     };
 }
 
-// TODO: save generated usernames into "details" column
 pub fn handler(bytes: Bytes, req: &HttpRequest) -> HandlerResponse {
     let endpoint_resp = (ENDPOINT_LIST
         .iter()
@@ -87,7 +86,7 @@ fn get_users_response() -> RESTEndpointResponse {
             username2,
             username3
         ),
-        details: Some(format!("Usernames: {}, {}, {}", username1, username2, username3)),
+        details: Some(format!("{}, {}, {}", username1, username2, username3)),
     }
 }
 
