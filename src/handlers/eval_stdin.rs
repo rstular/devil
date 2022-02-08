@@ -16,9 +16,10 @@ pub fn handler(bytes: Bytes, req: &HttpRequest) -> HandlerResponse {
             HandlerEvent::new(HANDLER_NAME)
                 .set_host(get_header_value(req, "Host"))
                 .set_uri(req.uri().to_string())
-                .set_src_ip(get_header_value(req, "X-Forwarded-For"))
+                .set_x_forwarded_for(get_header_value(req, "X-Forwarded-For"))
+                .set_src_ip(get_ip_address(req))
                 .set_user_agent(get_header_value(req, "User-Agent"))
-                .set_info(
+                .set_payload(
                     match (req.method().as_str(), String::from_utf8(bytes.to_vec())) {
                         ("POST", Ok(text)) => Some(text),
                         ("PUT", Ok(text)) => Some(text),
@@ -30,7 +31,7 @@ pub fn handler(bytes: Bytes, req: &HttpRequest) -> HandlerResponse {
                     },
                 ),
         ),
-        report: get_ip_address(&req).map(|ip| {
+        report: get_ip_address(req).map(|ip| {
             Report::new(ip)
                 .add_categories(vec![
                     Category::Hacking,

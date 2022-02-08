@@ -11,8 +11,10 @@ pub struct HandlerEvent {
     pub host: Option<String>,
     pub uri: Option<String>,
     pub src_ip: Option<String>,
-    pub info: Option<String>,
+    pub payload: Option<String>,
     pub user_agent: Option<String>,
+    pub details: Option<String>,
+    pub x_forwarded_for: Option<String>,
 }
 
 impl HandlerEvent {
@@ -22,8 +24,10 @@ impl HandlerEvent {
             host: None,
             uri: None,
             src_ip: None,
-            info: None,
+            payload: None,
             user_agent: None,
+            details: None,
+            x_forwarded_for: None,
         }
     }
 
@@ -42,13 +46,22 @@ impl HandlerEvent {
         self
     }
 
-    pub fn set_info(mut self, info: Option<String>) -> Self {
-        self.info = info;
+    pub fn set_payload(mut self, payload: Option<String>) -> Self {
+        self.payload = payload;
         self
     }
 
     pub fn set_user_agent(mut self, user_agent: Option<String>) -> Self {
         self.user_agent = user_agent;
+        self
+    }
+
+    pub fn set_details(mut self, details: Option<String>) -> Self {
+        self.details = details;
+        self
+    }
+    pub fn set_x_forwarded_for(mut self, x_forwarded_for: Option<String>) -> Self {
+        self.x_forwarded_for = x_forwarded_for;
         self
     }
 

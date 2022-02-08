@@ -6,7 +6,9 @@ table! {
         host -> Nullable<Text>,
         uri -> Nullable<Text>,
         src_ip -> Nullable<Text>,
-        info -> Nullable<Text>,
+        payload -> Nullable<Text>,
         user_agent -> Nullable<Text>,
+        details -> Nullable<Text>,
+        x_forwarded_for -> Nullable<Text>,
     }
 }

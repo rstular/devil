@@ -19,6 +19,7 @@ mod db;
 mod handler;
 mod handlers;
 mod reporter;
+mod utils;
 
 use handler::request_dispatcher;
 

@@ -47,14 +47,14 @@ impl Report {
         self
     }
 
-    pub fn remove_category(mut self, category: Category) -> Self {
-        self.categories.remove(&category);
+    pub fn remove_category(mut self, category: &Category) -> Self {
+        self.categories.remove(category);
         self
     }
 }
 
 #[allow(dead_code, clippy::upper_case_acronyms)]
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Category {
     DNSCompromise = 1,
     DNSPoisoning,
@@ -101,7 +101,7 @@ pub async fn submit_reports(config: ReporterConfig, receiver: mpsc::Receiver<Rep
 
     while let Ok(msg) = receiver.recv() {
         if report_timestamps.contains_key(&msg.ip)
-            && Instant::now().duration_since(report_timestamps.get(&msg.ip).unwrap().to_owned())
+            && Instant::now().duration_since(report_timestamps[&msg.ip])
                 < Duration::from_secs(15 * 60)
         {
             debug!("Skipping report for {} - rate limit", msg.ip);
@@ -146,5 +146,5 @@ pub async fn submit_reports(config: ReporterConfig, receiver: mpsc::Receiver<Rep
             }
         };
     }
-    println!("Exiting");
+    info!("Reporter thread exiting");
 }
