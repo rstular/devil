@@ -2,6 +2,7 @@
 pub struct Settings {
     pub host: String,
     pub port: Option<i64>,
+    pub workers: Option<i64>,
     pub reporting_enabled: bool,
     pub abuseipdb_key: Option<String>,
     pub report_endpoint: String,
@@ -13,6 +14,7 @@ impl Settings {
         Settings {
             host: String::from("127.0.0.1"),
             port: Some(8080),
+            workers: Some(2),
             reporting_enabled: false,
             abuseipdb_key: None,
             report_endpoint: String::from("https://api.abuseipdb.com/api/v2/report"),
@@ -27,6 +29,11 @@ impl Settings {
 
     pub fn set_port(mut self, port: i64) -> Self {
         self.port = Some(port);
+        self
+    }
+
+    pub fn set_workers(mut self, workers: i64) -> Self {
+        self.workers = Some(workers);
         self
     }
 

@@ -51,6 +51,7 @@ pub fn load_configuration() {
             std::process::abort();
         }),
         port: settings.get_int("http.port").ok(),
+        workers: settings.get_int("http.workers").ok(),
         reporting_enabled: settings.get_bool("enable-reporting").unwrap_or(false),
         abuseipdb_key: settings.get_str("abuseipdb-key").ok(),
         report_endpoint: settings
@@ -131,7 +132,8 @@ async fn main() -> std::io::Result<()> {
             .data(tx.clone())
             .wrap(middleware::Logger::default())
             .default_service(web::route().to(request_dispatcher))
-    });
+    })
+    .workers(settings.workers.unwrap_or(2).try_into().unwrap_or(2));
     srv = if settings.port.is_some() {
         let port = settings.port.expect("Could not get port from settings");
         let addr_obj = match format!("{}:{}", settings.host, port).parse::<SocketAddr>() {
