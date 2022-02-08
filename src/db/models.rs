@@ -1,6 +1,7 @@
 use super::schema::handler_events;
 use super::schema::handler_events::dsl::handler_events as handler_events_dsl;
 use diesel::prelude::*;
+use ipnetwork::IpNetwork;
 use log::error;
 use serde::{Deserialize, Serialize};
 
@@ -10,7 +11,7 @@ pub struct HandlerEvent {
     pub handler: String,
     pub host: Option<String>,
     pub uri: Option<String>,
-    pub src_ip: Option<String>,
+    pub src_ip: Option<IpNetwork>,
     pub payload: Option<String>,
     pub user_agent: Option<String>,
     pub details: Option<String>,
@@ -41,7 +42,7 @@ impl HandlerEvent {
         self
     }
 
-    pub fn set_src_ip(mut self, src_ip: Option<String>) -> Self {
+    pub fn set_src_ip(mut self, src_ip: Option<IpNetwork>) -> Self {
         self.src_ip = src_ip;
         self
     }
@@ -65,7 +66,7 @@ impl HandlerEvent {
         self
     }
 
-    pub fn insert(handler_event: Self, conn: &SqliteConnection) {
+    pub fn insert(handler_event: Self, conn: &PgConnection) {
         if let Err(e) = diesel::insert_into(handler_events_dsl)
             .values(handler_event)
             .execute(conn)

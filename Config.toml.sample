@@ -4,8 +4,11 @@ port = 8080
 workers = 2
 
 [db]
-path = "storage.db"
 migrate = true
+host = "localhost"
+port = 5432
+user = "devil"
+name = "devil"
 
 [reporting]
 enabled = true

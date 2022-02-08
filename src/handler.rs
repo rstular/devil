@@ -1,13 +1,13 @@
+use crate::configuration::get_settings_reader;
 use crate::db::models;
 use crate::db::DbPool;
-use crate::configuration::get_settings_reader;
 use crate::handlers::*;
 use crate::reporter::Report;
 use actix_web::{web, web::Bytes, HttpRequest, HttpResponse, Responder};
+use ipnetwork::IpNetwork;
 use lazy_static::lazy_static;
 use log::{debug, trace};
 use regex::Regex;
-use std::net::IpAddr;
 use std::sync::mpsc;
 
 lazy_static! {
@@ -87,22 +87,24 @@ pub fn get_header_value(req: &HttpRequest, header: &str) -> Option<String> {
     })
 }
 
-pub fn get_peer_address(req: &HttpRequest) -> Option<String> {
-    req.peer_addr().map(|addr| addr.ip().to_string())
+pub fn get_peer_address(req: &HttpRequest) -> Option<IpNetwork> {
+    req.peer_addr().map(|addr| IpNetwork::from(addr.ip()))
 }
 
-pub fn get_ip_address(req: &HttpRequest) -> Option<String> {
-    let forwarded_for = get_header_value(req, "X-Forwarded-For");
-    match forwarded_for {
+pub fn get_ip_address(req: &HttpRequest) -> Option<IpNetwork> {
+    match get_header_value(req, "X-Forwarded-For") {
         Some(ip) => {
             let last_ip = match ip.rfind(", ") {
                 Some(pos) => &ip[pos + 2..],
                 None => &ip,
             };
-            if last_ip.parse::<IpAddr>().is_ok() {
-                Some(last_ip.to_string())
-            } else {
-                get_peer_address(req)
+
+            match last_ip.parse::<IpNetwork>() {
+                Ok(ip) => Some(ip),
+                Err(e) => {
+                    trace!("Failed to parse X-Forwarded-For: {}", e);
+                    get_peer_address(req)
+                }
             }
         }
         None => get_peer_address(req),

@@ -1,5 +1,6 @@
 use actix_web::client::ClientBuilder;
 use chrono::Utc;
+use ipnetwork::IpNetwork;
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
@@ -19,9 +20,9 @@ pub struct Report {
 
 #[allow(dead_code)]
 impl Report {
-    pub fn new(ip: String) -> Report {
+    pub fn new(ip: IpNetwork) -> Report {
         Report {
-            ip,
+            ip: ip.to_string(),
             categories: HashSet::new(),
             comment: None,
         }
