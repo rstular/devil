@@ -22,7 +22,7 @@ pub struct Report {
 impl Report {
     pub fn new(ip: IpNetwork) -> Report {
         Report {
-            ip: ip.to_string(),
+            ip: ip.ip().to_string(),
             categories: HashSet::new(),
             comment: None,
         }
