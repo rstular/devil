@@ -28,7 +28,7 @@ pub fn establish_connection() -> DbPool {
         std::process::abort();
     });
 
-    if cfg!(test) || get_config_reader().get_bool("db-migrate").unwrap_or(false) {
+    if cfg!(test) || get_config_reader().get_bool("db.migrate").unwrap_or(false) {
         run_migrations(&pool.get().expect("Failed to acquire database connection"));
     }
 

@@ -46,18 +46,18 @@ pub fn get_settings_reader() -> RwLockReadGuard<'static, configuration::Settings
 pub fn load_configuration() {
     let settings = get_config_reader();
     let parsed_config = configuration::Settings {
-        host: settings.get_str("http-host").unwrap_or_else(|_| {
-            error!("Failed to get http-host from config");
+        host: settings.get_str("http.host").unwrap_or_else(|_| {
+            error!("Failed to get HTTP host from config");
             std::process::abort();
         }),
-        port: settings.get_int("http-port").ok(),
+        port: settings.get_int("http.port").ok(),
         reporting_enabled: settings.get_bool("enable-reporting").unwrap_or(false),
         abuseipdb_key: settings.get_str("abuseipdb-key").ok(),
         report_endpoint: settings
             .get("report-endpoint")
             .unwrap_or_else(|_| String::from("https://api.abuseipdb.com/api/v2/report")),
         db_path: settings
-            .get_str("db-path")
+            .get_str("db.path")
             .unwrap_or_else(|_| String::from("storage.db")),
     };
     drop(settings);
@@ -137,7 +137,7 @@ async fn main() -> std::io::Result<()> {
         let addr_obj = match format!("{}:{}", settings.host, port).parse::<SocketAddr>() {
             Ok(addr) => addr,
             Err(e) => {
-                error!("Failed to parse http-host and http-port: {}", e);
+                error!("Failed to parse HTTP host and HTTP port: {}", e);
                 std::process::abort();
             }
         };
