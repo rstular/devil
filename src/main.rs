@@ -1,5 +1,5 @@
 use actix_rt::System;
-use actix_web::{middleware, web, App, HttpServer};
+use actix_web::{web, App, HttpServer};
 use config::Config;
 use env_logger::Env;
 use lazy_static::lazy_static;
@@ -130,7 +130,6 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .data(conn_pool.clone())
             .data(tx.clone())
-            .wrap(middleware::Logger::default())
             .default_service(web::route().to(request_dispatcher))
     })
     .workers(settings.workers.unwrap_or(2).try_into().unwrap_or(2));
