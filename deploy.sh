@@ -21,7 +21,7 @@ if [ ! -d "$1" ]; then
 fi
 
 echo "Deploying from $project_path to $1"
-echo -n "Confirm? (y/N)"
+echo -n "Confirm? (y/N) "
 
 read answer
 
