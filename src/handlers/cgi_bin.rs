@@ -21,8 +21,7 @@ pub fn handler(bytes: Bytes, req: &HttpRequest) -> HandlerResponse {
                 .set_user_agent(get_header_value(req, "User-Agent"))
                 .set_payload(
                     match (req.method().as_str(), String::from_utf8(bytes.to_vec())) {
-                        ("POST", Ok(text)) => Some(text),
-                        ("PUT", Ok(text)) => Some(text),
+                        ("POST" | "PUT", Ok(text)) => Some(text),
                         (_, Err(e)) => {
                             warn!("Failed to decode POST payload: {}", e);
                             None
