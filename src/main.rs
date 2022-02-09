@@ -1,4 +1,5 @@
 use actix_rt::System;
+use actix_web::middleware::normalize::TrailingSlash;
 use actix_web::{middleware, web, App, HttpServer};
 use env_logger::Env;
 use handler::request_dispatcher;
@@ -78,7 +79,7 @@ async fn main() -> std::io::Result<()> {
     info!("Starting HTTP server");
     let mut srv = HttpServer::new(move || {
         App::new()
-            .wrap(middleware::NormalizePath::default())
+            .wrap(middleware::NormalizePath::new(TrailingSlash::Trim))
             .data(conn_pool.clone())
             .data(tx.clone())
             .default_service(web::route().to(request_dispatcher))
