@@ -1,6 +1,6 @@
 table! {
     handler_events (id) {
-        id -> Nullable<Integer>,
+        id -> Integer,
         timestamp -> Timestamp,
         handler -> Text,
         host -> Nullable<Text>,
