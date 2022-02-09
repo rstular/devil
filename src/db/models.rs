@@ -9,12 +9,13 @@ use serde::{Deserialize, Serialize};
 #[table_name = "handler_events"]
 pub struct HandlerEvent {
     pub handler: String,
+    pub subhandler: Option<String>,
     pub host: Option<String>,
     pub uri: Option<String>,
     pub src_ip: Option<IpNetwork>,
     pub payload: Option<String>,
     pub user_agent: Option<String>,
-    pub details: Option<String>,
+    pub handler_data: Option<String>,
     pub x_forwarded_for: Option<String>,
 }
 
@@ -22,14 +23,20 @@ impl HandlerEvent {
     pub fn new(handler: &str) -> Self {
         HandlerEvent {
             handler: handler.to_string(),
+            subhandler: None,
             host: None,
             uri: None,
             src_ip: None,
             payload: None,
             user_agent: None,
-            details: None,
+            handler_data: None,
             x_forwarded_for: None,
         }
+    }
+
+    pub fn set_subhandler(mut self, subhandler: Option<&str>) -> Self {
+        self.subhandler = subhandler.map(|s| s.to_string());
+        self
     }
 
     pub fn set_host(mut self, host: Option<String>) -> Self {
@@ -57,8 +64,8 @@ impl HandlerEvent {
         self
     }
 
-    pub fn set_details(mut self, details: Option<String>) -> Self {
-        self.details = details;
+    pub fn set_handler_data(mut self, handler_data: Option<String>) -> Self {
+        self.handler_data = handler_data;
         self
     }
     pub fn set_x_forwarded_for(mut self, x_forwarded_for: Option<String>) -> Self {
