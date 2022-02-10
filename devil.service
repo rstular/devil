@@ -6,7 +6,8 @@ After=network.target
 Type=simple
 Restart=on-failure
 
-ExecStart=/srv/services/devil/devil /etc/devil/Config.toml
+UMask=000
+ExecStart=/srv/services/devil/devil ${CREDENTIALS_DIRECTORY}/Config.toml
 WorkingDirectory=/srv/services/devil/
 
 StandardOutput=journal
@@ -20,9 +21,11 @@ ProtectHome=true
 ReadOnlyPaths=/srv/services/devil/
 StateDirectory=devil
 RuntimeDirectory=devil
+RuntimeDirectoryMode=0773
 DynamicUser=true
 
 PrivateUsers=true
+LoadCredential=Config.toml:/etc/devil/Config.toml
 
 NoNewPrivileges=true
 ConfigurationDirectory=devil
