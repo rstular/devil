@@ -24,7 +24,7 @@ struct RESTEndpointResponse {
 lazy_static! {
     static ref ENDPOINT_LIST: Vec<RESTEndpoint> = {
         vec![RESTEndpoint {
-            pattern: Regex::new("v2/users/").expect("Failed to compile regex"),
+            pattern: Regex::new("v2/users").expect("Failed to compile regex"),
             response: get_users_response,
         }]
     };
